@@ -1,14 +1,12 @@
 # ChargeRoute UK interactive prototype
 
-This is a self-contained browser prototype based on the ChargeRoute UK MVP specification. It demonstrates the route-search controls, reachability calculation, filtering, price ordering, map and result synchronization, empty states, and responsive layout.
+This browser prototype demonstrates route-search controls, reachability calculation, filtering, price ordering, map and result synchronization, empty states, and responsive layout. With user-supplied API keys it loads a MapTiler basemap, geocodes the two UK locations through ORS, and requests a driving route with optional toll avoidance.
 
-The prototype uses a frozen Sutton-to-Manchester route and illustrative charger records. It does not call live routing, charger, tariff, status, or map-tile services. It stores no journey information.
+Charger locations, tariffs, status and reachability distances remain illustrative fixtures. API keys are held only in page memory and are not stored by the prototype.
 
 ## Run locally
 
-The quickest option is to double-click `index.html` and open it in a modern browser.
-
-For a local web server, run one of these commands from this folder:
+Because MapLibre is bundled as a browser module, run the prototype through a local web server rather than double-clicking `index.html`. From this folder, run one of these commands:
 
 ```sh
 python -m http.server 8000
@@ -24,7 +22,7 @@ Then open `http://localhost:8000` or the address shown by the selected server.
 
 ## Publish with GitHub Pages
 
-1. Create a GitHub repository and upload `index.html`, `README.md`, and `SPEC_DECISIONS.md` to the repository root.
+1. Create a GitHub repository and upload `index.html`, `README.md`, `SPEC_DECISIONS.md`, and the complete `assets` folder to the repository root.
 2. Open the repository's **Settings** page, then select **Pages**.
 3. Under **Build and deployment**, select **Deploy from a branch**.
 4. Select the `main` branch and `/(root)`, then save.
@@ -32,20 +30,31 @@ Then open `http://localhost:8000` or the address shown by the selected server.
 
 GitHub Pages publishes static sites publicly. Do not add API keys or other secrets to this repository or to `index.html`.
 
+## API setup
+
+1. Obtain a MapTiler API key and an openrouteservice/HeiGIT API key.
+2. Open the running prototype.
+3. Enter both keys in **Live map & routing**. The inputs are masked and are not saved.
+4. Optionally select **Avoid toll roads**, then choose **Find reachable chargers**.
+
+For this static prototype, API calls run from the browser. Restrict the MapTiler key to the deployed domain where possible. A production implementation must send ORS requests through a backend so the ORS credential is never exposed to browser users.
+
 ## Suggested checks
 
 - Change current SOC from 60% to 20%. No charger should remain reachable with the default reserve.
 - Restore SOC to 60%, select `150+ kW`, and run the search. Lower-powered sites should disappear.
 - Set maximum additional detour to `0.5 km`. Only sites within that extra travel distance should remain.
 - Open **Exclude networks**, select one or more networks, run the search, and confirm their sites disappear.
+- Enter valid MapTiler and ORS keys and confirm the schematic changes to a real map with the calculated route.
+- Select **Avoid toll roads**, run the route again, and confirm the success message identifies a toll-free route.
 - Turn on **Hide chargers with unknown price** and confirm the price-unavailable result disappears.
 - Select a result card and a map marker. Both views should show the same selected charger.
 - Resize the browser to a phone-width window and confirm there is no horizontal page scrolling.
 
 ## Prototype limitations
 
-- Start and destination fields update labels but do not geocode or request a new route.
-- Route geometry and charger data are fixtures.
+- A live route requires valid MapTiler and ORS keys plus internet access.
+- The route geometry can be live, but charger positions and route-relative charger distances are still fixtures.
 - Prices and availability are illustrative, not current public-charger information.
 - The energy model is constant-efficiency and does not include weather, elevation, traffic, speed, battery temperature, or charging curves.
 - The prototype is static and has no backend, database, ingestion worker, or administrative endpoints.
@@ -54,7 +63,7 @@ GitHub Pages publishes static sites publicly. Do not add API keys or other secre
 
 1. Build the production application foundation, database schema, provider adapters, configuration, and automated tests.
 2. Import live OCPI location, connector, tariff, and status data.
-3. Add live geocoding and routing plus a real interactive MapLibre map. Include **Avoid tolls** as a route option at this stage.
+3. Move ORS behind the application backend and turn the current live routing/map integration into a production service.
 4. Implement route-corridor search, chainage, reachability, exclusions, and final road-distance detour checks.
-5. Add optional GPX preferred-route import after the live routing and spatial-search path is stable. The first version should validate and follow the imported track; road snapping may require a separate map-matching service or self-hosted routing engine.
+5. Add optional GPX preferred-route import in a later version, after the live routing and spatial-search path is stable.
 6. Complete the energy model, price ranking, caching, monitoring, accessibility, security, and private-trial deployment.

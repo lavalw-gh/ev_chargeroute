@@ -73,4 +73,14 @@ The production version should replace the schematic fixture with a real interact
 
 Add **Avoid tolls** with the first live routing integration. It is a route-generation preference, so changing it must request a new route and rerun charger reachability rather than filtering the existing results.
 
-Treat GPX import as the next routing enhancement after live routing, maps, and route-corridor search. The initial mode should accept a valid driving track as preferred/locked route geometry, validate and simplify it, and calculate charger reachability along it. A later mode may convert the track to via points or use map matching. Uploaded route files should not be persisted by default.
+Treat GPX import as a later-version enhancement after live routing, maps, and route-corridor search. It is explicitly outside this initial implementation. Its first mode should accept a valid driving track as preferred/locked route geometry, validate and simplify it, and calculate charger reachability along it. A later mode may convert the track to via points or use map matching. Uploaded route files should not be persisted by default.
+
+## Initial live-routing prototype scope
+
+- Accept masked MapTiler and ORS API-key inputs immediately above the search action.
+- Keep both keys in page memory only; do not use local storage, cookies, query strings, or checked-in configuration.
+- Use the MapTiler `streets-v4` style with the bundled MapLibre GL JS renderer.
+- Geocode UK start and destination text and request a `driving-car` route from the HeiGIT-hosted ORS API.
+- When **Avoid toll roads** is selected, send `options.avoid_features: ["tollways"]` and recalculate the route.
+- Keep charger, tariff, availability, chainage, and detour information as clearly labelled fixture data until live OCPI ingestion and spatial matching are implemented.
+- In production, proxy ORS through the backend and apply provider throttling; do not ship a privileged ORS key to browsers.
