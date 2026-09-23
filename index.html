@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ChargeRoute UK interactive MVP prototype for finding reachable rapid EV chargers along a route.">
+  <meta name="theme-color" content="#071c2b">
+  <title>ChargeRoute UK Prototype</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23071c2b'/%3E%3Cpath d='M18 38h9l-4 13 23-26H34l5-13z' fill='%23b9f227'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --ink: #071c2b;
+      --ink-2: #102b3b;
+      --muted: #5d6e78;
+      --line: #d7e0e3;
+      --paper: #f4f7f5;
+      --white: #ffffff;
+      --lime: #b9f227;
+      --lime-dark: #507400;
+      --cyan: #79d8ff;
+      --amber: #ffc66b;
+      --red: #ff817e;
+      --shadow: 0 18px 60px rgba(4, 29, 43, 0.13);
+    }
+    * { box-sizing: border-box; }
+    html { font-size: 16px; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background: var(--paper);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.45;
+    }
+    button, input, select { font: inherit; }
+    button, input, select, [tabindex] { outline-offset: 3px; }
+    button:focus-visible, input:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 3px solid rgba(62, 155, 255, .55); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .shell { min-height: 100vh; display: flex; flex-direction: column; }
+    header {
+      height: 68px;
+      padding: 0 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 247, 245, .94);
+      backdrop-filter: blur(14px);
+    }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 850; letter-spacing: -.025em; }
+    .brand-mark { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 9px; color: var(--lime); background: var(--ink); }
+    .brand-mark svg { width: 20px; height: 20px; }
+    .prototype-badge { padding: 6px 10px; border: 1px solid #b8c7cc; border-radius: 999px; color: #3c515d; background: #fff; font-size: .78rem; font-weight: 750; letter-spacing: .04em; text-transform: uppercase; }
+    main { flex: 1; display: grid; grid-template-columns: minmax(340px, 38%) minmax(0, 62%); min-height: calc(100vh - 68px); }
+    .panel { min-width: 0; background: var(--white); border-right: 1px solid var(--line); }
+    .panel-scroll { height: calc(100vh - 68px); overflow-y: auto; }
+    .controls { padding: 22px 22px 16px; }
+    .eyebrow { margin: 0 0 5px; color: var(--lime-dark); font-size: .75rem; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(1.45rem, 2.4vw, 2rem); line-height: 1.08; letter-spacing: -.04em; }
+    .lede { margin: 8px 0 18px; max-width: 52ch; color: var(--muted); font-size: .9rem; }
+    .route-fields { display: grid; grid-template-columns: 1fr auto 1fr; gap: 9px; align-items: end; }
+    label { display: block; color: #334b58; font-size: .78rem; font-weight: 760; }
+    input, select {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      border: 1px solid #c8d4d8;
+      border-radius: 10px;
+      color: var(--ink);
+      background: #fbfdfc;
+    }
+    input[type="range"] { margin: 5px 0 0; padding: 0; accent-color: #648f00; }
+    .swap { width: 38px; height: 42px; margin-bottom: 0; border: 1px solid #c8d4d8; border-radius: 10px; background: white; color: var(--ink); cursor: pointer; }
+    .section-label { margin: 21px 0 10px; display: flex; align-items: center; justify-content: space-between; font-size: .78rem; font-weight: 850; letter-spacing: .075em; text-transform: uppercase; }
+    .section-label span:last-child { color: var(--muted); font-weight: 650; letter-spacing: 0; text-transform: none; }
+    .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .field { min-width: 0; }
+    .field output { float: right; color: var(--ink); font-variant-numeric: tabular-nums; }
+    .chip-group { display: flex; flex-wrap: wrap; gap: 7px; }
+    .chip { position: relative; }
+    .chip input { position: absolute; opacity: 0; pointer-events: none; }
+    .chip span { display: inline-flex; padding: 8px 11px; border: 1px solid #c7d2d6; border-radius: 999px; background: white; color: #3b525e; font-size: .84rem; font-weight: 720; cursor: pointer; }
+    .chip input:checked + span { border-color: var(--ink); color: white; background: var(--ink); }
+    .provider-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+    .provider-toggle { display: flex; align-items: center; gap: 7px; padding: 9px 10px; border: 1px solid #d3dcdf; border-radius: 9px; color: #425762; font-size: .8rem; cursor: pointer; }
+    .provider-toggle input { width: auto; margin: 0; accent-color: var(--lime-dark); }
+    .check-row { display: flex; align-items: center; gap: 9px; margin-top: 12px; color: #405661; font-size: .84rem; }
+    .check-row input { width: auto; margin: 0; accent-color: var(--lime-dark); }
+    .primary {
+      width: 100%; margin-top: 18px; padding: 13px 16px; border: 0; border-radius: 11px;
+      background: var(--ink); color: white; font-weight: 850; cursor: pointer; box-shadow: 0 8px 22px rgba(7, 28, 43, .22);
+    }
+    .primary:hover { background: #123247; }
+    .primary strong { color: var(--lime); }
+    .fixture-note { margin: 10px 0 0; color: var(--muted); font-size: .75rem; }
+    .results-wrap { border-top: 1px solid var(--line); padding: 18px 18px 24px; background: #f8faf9; }
+    .results-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .results-head h2 { margin: 0; font-size: 1rem; letter-spacing: -.01em; }
+    .results-head select { width: auto; margin: 0; padding: 7px 28px 7px 9px; font-size: .78rem; }
+    .results-summary { margin: 0 0 12px; color: var(--muted); font-size: .8rem; }
+    .result-list { display: grid; gap: 9px; }
+    .result-card {
+      display: grid; grid-template-columns: auto 1fr auto; gap: 11px; align-items: center;
+      padding: 13px; border: 1px solid #d5dfe2; border-radius: 12px; background: white; cursor: pointer; text-align: left;
+    }
+    .result-card:hover { border-color: #9fb0b7; transform: translateY(-1px); }
+    .result-card.active { border-color: #6b9204; box-shadow: 0 0 0 2px rgba(185, 242, 39, .45); }
+    .rank { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 8px; background: #e9eef0; font-size: .77rem; font-weight: 850; }
+    .result-title { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+    .result-title strong { font-size: .9rem; }
+    .tag { padding: 3px 6px; border-radius: 999px; background: #ecf9c8; color: #426100; font-size: .65rem; font-weight: 850; text-transform: uppercase; letter-spacing: .06em; }
+    .result-meta { margin-top: 3px; color: var(--muted); font-size: .74rem; }
+    .price { text-align: right; font-size: .8rem; color: var(--muted); }
+    .price strong { display: block; color: var(--ink); font-size: 1.05rem; }
+    .empty { padding: 22px; border: 1px dashed #b8c7cc; border-radius: 12px; background: white; color: var(--muted); font-size: .88rem; }
+    .map-stage { position: relative; min-width: 0; overflow: hidden; color: white; background: #071c2b; }
+    .map-grid { position: absolute; inset: 0; opacity: .32; background-image: linear-gradient(rgba(121,216,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(121,216,255,.08) 1px, transparent 1px); background-size: 42px 42px; mask-image: radial-gradient(circle at 55% 45%, #000 0, transparent 76%); }
+    .map-topbar { position: absolute; z-index: 5; top: 18px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .route-card { padding: 12px 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 13px; background: rgba(8,31,46,.82); box-shadow: var(--shadow); backdrop-filter: blur(12px); }
+    .route-card small { display: block; color: #a9bdc8; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+    .route-card strong { display: block; margin-top: 2px; font-size: .98rem; }
+    .route-metrics { display: flex; gap: 20px; }
+    .map-legend { display: flex; gap: 12px; color: #c2d0d7; font-size: .72rem; }
+    .legend-dot { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 50%; }
+    .map-canvas { position: absolute; inset: 70px 0 0; width: 100%; height: calc(100% - 70px); }
+    .land { fill: rgba(119, 166, 180, .07); stroke: rgba(135, 193, 207, .18); stroke-width: 1.2; }
+    .route-shadow { fill: none; stroke: rgba(0,0,0,.5); stroke-width: 14; stroke-linecap: round; stroke-linejoin: round; }
+    .route-line { fill: none; stroke: var(--lime); stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
+    .route-progress { fill: none; stroke: #fff; stroke-width: 2; stroke-dasharray: 2 13; stroke-linecap: round; opacity: .65; }
+    .endpoint { fill: white; stroke: var(--ink); stroke-width: 4; }
+    .endpoint.end { fill: var(--lime); }
+    .marker { cursor: pointer; filter: drop-shadow(0 6px 8px rgba(0,0,0,.4)); }
+    .marker circle { stroke: #071c2b; stroke-width: 4; transition: r .18s ease, fill .18s ease; }
+    .marker.available circle { fill: var(--lime); }
+    .marker.unknown circle { fill: var(--amber); }
+    .marker:hover circle, .marker.active circle { r: 11; fill: white; }
+    .marker text { fill: var(--ink); font-size: 9px; font-weight: 900; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
+    .map-label { fill: #dce7eb; font-size: 12px; font-weight: 750; paint-order: stroke; stroke: #071c2b; stroke-width: 4px; stroke-linejoin: round; }
+    .detail-card { position: absolute; z-index: 6; right: 20px; bottom: 22px; width: min(360px, calc(100% - 40px)); padding: 17px; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; background: rgba(248,251,250,.97); color: var(--ink); box-shadow: 0 22px 70px rgba(0,0,0,.34); }
+    .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .detail-head h2 { margin: 0; font-size: 1.1rem; letter-spacing: -.02em; }
+    .status { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800; }
+    .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #6e9b00; }
+    .status.unknown::before { background: #c98209; }
+    .detail-provider { margin: 4px 0 14px; color: var(--muted); font-size: .8rem; }
+    .detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .detail-grid div { padding: 9px; border-radius: 9px; background: #e9eff0; }
+    .detail-grid small { display: block; color: var(--muted); font-size: .66rem; text-transform: uppercase; letter-spacing: .05em; }
+    .detail-grid strong { display: block; margin-top: 2px; font-size: .88rem; }
+    .freshness { margin: 12px 0 0; color: var(--muted); font-size: .72rem; }
+    .disclaimer { position: absolute; z-index: 4; left: 20px; bottom: 22px; max-width: 300px; color: #9eb1bb; font-size: .7rem; }
+    .toast { position: fixed; z-index: 20; left: 50%; bottom: 24px; translate: -50% 16px; padding: 11px 14px; border-radius: 10px; background: #fff; color: var(--ink); box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: .22s ease; font-size: .83rem; }
+    .toast.show { opacity: 1; translate: -50% 0; }
+    @media (max-width: 900px) {
+      header { height: 62px; padding: 0 15px; }
+      main { display: block; }
+      .panel { border-right: 0; }
+      .panel-scroll { height: auto; overflow: visible; }
+      .map-stage { min-height: 610px; }
+      .map-topbar { flex-wrap: wrap; }
+      .disclaimer { bottom: 14px; max-width: 44%; }
+    }
+    @media (max-width: 560px) {
+      .brand { gap: 7px; font-size: .82rem; white-space: nowrap; }
+      .brand-mark { width: 30px; height: 30px; }
+      .prototype-badge { max-width: 180px; padding: 5px 7px; text-align: center; font-size: .58rem; }
+      .controls { padding: 18px 14px 14px; }
+      .route-fields { grid-template-columns: 1fr auto; }
+      .route-fields .field:last-child { grid-column: 1 / -1; }
+      .swap { grid-row: 1; grid-column: 2; }
+      .metrics-grid { grid-template-columns: 1fr; }
+      .provider-grid { grid-template-columns: 1fr 1fr; }
+      .results-wrap { padding-inline: 12px; }
+      .result-card { grid-template-columns: auto 1fr; }
+      .price { grid-column: 2; text-align: left; }
+      .map-stage { min-height: 640px; }
+      .map-topbar { top: 12px; left: 12px; right: 12px; }
+      .route-card:last-child { display: none; }
+      .map-canvas { inset-block-start: 78px; height: calc(100% - 78px); }
+      .detail-card { left: 12px; right: 12px; bottom: 56px; width: auto; }
+      .disclaimer { left: 12px; right: 12px; bottom: 12px; max-width: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M8 14h4l-2 7 8-11h-5l2-7z"/></svg></span>ChargeRoute UK</div>
+      <span class="prototype-badge">Interactive prototype · fixture data</span>
+    </header>
+
+    <main>
+      <section class="panel" aria-label="Route and charger controls">
+        <div class="panel-scroll">
+          <div class="controls">
+            <p class="eyebrow">Plan the next charging stop</p>
+            <h1>Cheapest chargers you can safely reach</h1>
+            <p class="lede">Compare rapid chargers along your route without dropping below your arrival reserve.</p>
+
+            <div class="route-fields">
+              <label class="field">From<input id="start" value="Sutton" autocomplete="off" aria-label="Start location"></label>
+              <button class="swap" id="swap" type="button" title="Swap start and destination" aria-label="Swap start and destination">⇄</button>
+              <label class="field">To<input id="end" value="Manchester" autocomplete="off" aria-label="Destination"></label>
+            </div>
+
+            <div class="section-label"><span>Energy</span><span id="rangeSummary">126 mi to reserve</span></div>
+            <div class="metrics-grid">
+              <label class="field">Current SOC <output id="socOutput">60%</output><input id="soc" type="range" min="1" max="100" value="60"></label>
+              <label class="field">Arrival reserve <output id="reserveOutput">12%</output><input id="reserve" type="range" min="5" max="30" value="12"></label>
+              <label class="field">Usable battery<input id="battery" type="number" min="10" max="200" step="1" value="75"><span class="sr-only">kilowatt hours</span></label>
+              <label class="field">Efficiency mi/kWh<input id="efficiency" type="number" min="1" max="8" step="0.1" value="3.5"></label>
+            </div>
+
+            <div class="section-label"><span>Charger filters</span><span>CCS2</span></div>
+            <div class="chip-group" aria-label="Minimum charger power">
+              <label class="chip"><input type="radio" name="power" value="50" checked><span>50+ kW</span></label>
+              <label class="chip"><input type="radio" name="power" value="100"><span>100+ kW</span></label>
+              <label class="chip"><input type="radio" name="power" value="150"><span>150+ kW</span></label>
+              <label class="chip"><input type="radio" name="power" value="300"><span>300+ kW</span></label>
+            </div>
+            <label class="field" style="margin-top:12px">Maximum additional detour to charger
+              <select id="additionalDetour">
+                <option value="0.5">0.5 km</option>
+                <option value="1" selected>1.0 km</option>
+                <option value="2">2.0 km</option>
+                <option value="5">5.0 km</option>
+              </select>
+            </label>
+            <div class="section-label"><span>Networks</span><span>Exclude any</span></div>
+            <div class="provider-grid" id="providers"></div>
+            <label class="check-row"><input id="hideUnknown" type="checkbox"> Hide chargers with unknown price</label>
+            <label class="check-row"><input id="availableOnly" type="checkbox"> Show available chargers only</label>
+
+            <button class="primary" id="find" type="button">Find reachable chargers <strong>→</strong></button>
+            <p class="fixture-note">This prototype uses a frozen Sutton–Manchester route and sample charger data. No location or journey data is stored.</p>
+          </div>
+
+          <div class="results-wrap" aria-live="polite">
+            <div class="results-head"><h2 id="resultsHeading">Reachable chargers</h2><select id="sort" aria-label="Sort charger results"><option value="price">Lowest price</option><option value="soc">Highest arrival SOC</option><option value="additionalDetour">Lowest extra detour</option><option value="distance">Nearest along route</option><option value="power">Highest power</option></select></div>
+            <p class="results-summary" id="summary"></p>
+            <div class="result-list" id="results"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="map-stage" aria-label="Route map preview">
+        <div class="map-grid" aria-hidden="true"></div>
+        <div class="map-topbar">
+          <div class="route-card"><small>Selected route</small><strong><span id="startLabel">Sutton</span> → <span id="endLabel">Manchester</span></strong></div>
+          <div class="route-card route-metrics"><span><small>Distance</small><strong>351 km</strong></span><span><small>Drive time</small><strong>4 hr 12 min</strong></span></div>
+          <div class="route-card map-legend"><span><i class="legend-dot" style="background:var(--lime)"></i>Available</span><span><i class="legend-dot" style="background:var(--amber)"></i>Unknown</span></div>
+        </div>
+
+        <svg class="map-canvas" viewBox="0 0 760 650" role="img" aria-labelledby="mapTitle mapDesc" preserveAspectRatio="xMidYMid meet">
+          <title id="mapTitle">Route from Sutton to Manchester with charger markers</title>
+          <desc id="mapDesc">A schematic map showing the route and reachable charger candidates from the frozen prototype dataset.</desc>
+          <path class="land" d="M108 576C72 511 81 441 124 395c33-35 49-69 51-114 2-46 36-67 67-84 34-18 57-39 78-78 28-50 91-67 143-45 53 22 89 62 115 111 25 48 65 71 91 114 35 57 29 130-15 177-35 38-73 50-119 74-67 35-117 70-200 69-91-1-179 13-227-43z"/>
+          <path class="route-shadow" d="M218 555 C245 502 274 462 294 415 S351 336 386 295 S428 212 489 164 S536 110 562 82"/>
+          <path class="route-line" d="M218 555 C245 502 274 462 294 415 S351 336 386 295 S428 212 489 164 S536 110 562 82"/>
+          <path class="route-progress" d="M218 555 C245 502 274 462 294 415 S351 336 386 295 S428 212 489 164 S536 110 562 82"/>
+          <circle class="endpoint" cx="218" cy="555" r="10"/><circle class="endpoint end" cx="562" cy="82" r="10"/>
+          <text class="map-label" x="178" y="586">Sutton</text><text class="map-label" x="575" y="76">Manchester</text>
+          <g id="markers"></g>
+        </svg>
+
+        <article class="detail-card" id="detail" aria-live="polite"></article>
+        <p class="disclaimer">Planning estimate only. Follow your vehicle’s range warnings and account for weather, speed and real-world conditions.</p>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script>
+    const chargers = [
+      { id:'ionity-beaconsfield', name:'Beaconsfield Services', provider:'IONITY', miles:38, additionalDetourKm:0.7, power:350, status:'AVAILABLE', price:74, tariff:'74p/kWh', x:258, y:487 },
+      { id:'instavolt-banbury', name:'Banbury Cross Retail Park', provider:'InstaVolt', miles:73, additionalDetourKm:0.4, power:160, status:'AVAILABLE', price:59, tariff:'59p/kWh', x:302, y:405 },
+      { id:'mfg-rugby', name:'MFG Rugby North', provider:'MFG', miles:101, additionalDetourKm:0.8, power:150, status:'UNKNOWN', price:69, tariff:'69p/kWh', x:349, y:342 },
+      { id:'tesla-rugby', name:'Rugby Supercharger', provider:'Tesla', miles:106, additionalDetourKm:0.6, power:250, status:'AVAILABLE', price:null, tariff:'Price unavailable', x:376, y:318 },
+      { id:'gridserve-stafford', name:'Stafford North Services', provider:'GRIDSERVE', miles:145, additionalDetourKm:0.9, power:350, status:'AVAILABLE', price:79, tariff:'79p/kWh', x:441, y:231 },
+      { id:'ionity-stafford', name:'Stafford Gateway', provider:'IONITY', miles:149, additionalDetourKm:1.6, power:350, status:'AVAILABLE', price:55, tariff:'55p/kWh + £1 session', complex:true, x:458, y:217 },
+      { id:'instavolt-stoke', name:'Stoke Festival Park', provider:'InstaVolt', miles:168, additionalDetourKm:1.9, power:160, status:'UNKNOWN', price:62, tariff:'62p/kWh', x:486, y:177 },
+      { id:'mfg-knutsford', name:'MFG Knutsford', provider:'MFG', miles:198, additionalDetourKm:0.8, power:150, status:'AVAILABLE', price:66, tariff:'66p/kWh', x:530, y:119 }
+    ];
+    const providers = [...new Set(chargers.map(c => c.provider))];
+    let visible = [];
+    let selectedId = null;
+    const $ = id => document.getElementById(id);
+
+    function values() {
+      return {
+        soc: +$('soc').value,
+        reserve: +$('reserve').value,
+        battery: +$('battery').value,
+        efficiency: +$('efficiency').value,
+        power: +document.querySelector('input[name="power"]:checked').value,
+        additionalDetourKm: +$('additionalDetour').value,
+        excluded: [...document.querySelectorAll('#providers input:checked')].map(el => el.value),
+        hideUnknown: $('hideUnknown').checked,
+        availableOnly: $('availableOnly').checked,
+        sort: $('sort').value
+      };
+    }
+
+    function arrivalSoc(charger, v) {
+      const used = charger.miles / v.efficiency;
+      return v.soc - (used / v.battery * 100);
+    }
+
+    function updateEnergyPreview() {
+      const v = values();
+      $('socOutput').value = `${v.soc}%`;
+      $('reserveOutput').value = `${v.reserve}%`;
+      const usable = v.battery * Math.max(0, (v.soc - v.reserve) / 100);
+      const miles = usable * v.efficiency;
+      $('rangeSummary').textContent = `${Math.round(miles)} mi to reserve`;
+    }
+
+    function rank(list, mode) {
+      const sorters = {
+        price: (a,b) => ((a.complex ? 1 : a.price == null ? 2 : 0) - (b.complex ? 1 : b.price == null ? 2 : 0)) || ((a.price ?? 999) - (b.price ?? 999)) || a.additionalDetourKm-b.additionalDetourKm || b.power-a.power,
+        soc: (a,b) => b.arrival-a.arrival,
+        additionalDetour: (a,b) => a.additionalDetourKm-b.additionalDetourKm,
+        distance: (a,b) => a.miles-b.miles,
+        power: (a,b) => b.power-a.power
+      };
+      return [...list].sort(sorters[mode] || sorters.price);
+    }
+
+    function findChargers(showToast=false) {
+      const v = values();
+      updateEnergyPreview();
+      if (!Number.isFinite(v.battery) || v.battery <= 0 || !Number.isFinite(v.efficiency) || v.efficiency <= 0) {
+        visible = [];
+        renderResults('Enter a valid battery capacity and efficiency.');
+        return;
+      }
+      if (v.soc <= v.reserve) {
+        visible = [];
+        renderResults('Current SOC must be above the arrival reserve before a charger can be safely recommended.');
+        return;
+      }
+      visible = chargers.map(c => ({...c, arrival: arrivalSoc(c, v)})).filter(c =>
+        c.arrival >= v.reserve && c.power >= v.power && c.additionalDetourKm <= v.additionalDetourKm &&
+        !v.excluded.includes(c.provider) && (!v.hideUnknown || c.price != null) &&
+        (!v.availableOnly || c.status === 'AVAILABLE')
+      );
+      visible = rank(visible, v.sort);
+      if (!visible.some(c => c.id === selectedId)) selectedId = visible[0]?.id || null;
+      $('startLabel').textContent = $('start').value.trim() || 'Start';
+      $('endLabel').textContent = $('end').value.trim() || 'Destination';
+      renderResults(); renderMarkers(); renderDetail();
+      if (showToast) toast(`${visible.length} qualifying charger${visible.length === 1 ? '' : 's'} found using the frozen route fixture.`);
+    }
+
+    function renderResults(message='') {
+      const results = $('results');
+      const v = values();
+      $('resultsHeading').textContent = visible.length ? 'Reachable chargers' : 'No matching chargers';
+      $('summary').textContent = visible.length ? `${visible.length} of ${chargers.length} sites qualify · ${Math.round(v.battery * (v.soc-v.reserve)/100 * v.efficiency)} mi modelled reach` : '';
+      if (!visible.length) {
+        results.innerHTML = `<div class="empty">${message || 'No chargers match your reserve and filters. Try lowering minimum power, allowing a longer additional detour, or reducing reserve.'}</div>`;
+        renderMarkers(); renderDetail(); return;
+      }
+      results.innerHTML = visible.map((c,i) => {
+        const badge = i===0 && v.sort==='price' ? '<span class="tag">Cheapest</span>' : c.additionalDetourKm === Math.min(...visible.map(x=>x.additionalDetourKm)) ? '<span class="tag">Lowest extra detour</span>' : '';
+        return `<button class="result-card ${c.id===selectedId?'active':''}" data-id="${c.id}" type="button"><span class="rank">${i+1}</span><span><span class="result-title"><strong>${c.name}</strong>${badge}</span><span class="result-meta">${c.provider} · ${c.power} kW · ${c.miles} mi along route · ${c.additionalDetourKm.toFixed(1)} km extra detour · ${c.arrival.toFixed(0)}% arrival</span></span><span class="price"><strong>${c.complex?'Complex':c.price==null?'Unknown':c.price+'p'}</strong>${c.price!=null&&!c.complex?'per kWh':c.tariff}</span></button>`;
+      }).join('');
+      results.querySelectorAll('.result-card').forEach(card => card.addEventListener('click', () => selectCharger(card.dataset.id)));
+    }
+
+    function renderMarkers() {
+      const markerRoot = $('markers');
+      markerRoot.innerHTML = visible.map((c,i) => `<g class="marker ${c.status.toLowerCase()} ${c.id===selectedId?'active':''}" data-id="${c.id}" tabindex="0" role="button" aria-label="${c.name}, ${c.tariff}"><circle cx="${c.x}" cy="${c.y}" r="9"></circle><text x="${c.x}" y="${c.y+0.5}">${i+1}</text></g>`).join('');
+      markerRoot.querySelectorAll('.marker').forEach(marker => {
+        marker.addEventListener('click', () => selectCharger(marker.dataset.id));
+        marker.addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') { e.preventDefault(); selectCharger(marker.dataset.id); } });
+      });
+    }
+
+    function renderDetail() {
+      const c = visible.find(x => x.id === selectedId);
+      if (!c) { $('detail').hidden = true; return; }
+      $('detail').hidden = false;
+      $('detail').innerHTML = `<div class="detail-head"><h2>${c.name}</h2><span class="status ${c.status==='UNKNOWN'?'unknown':''}">${c.status==='AVAILABLE'?'Available':'Status unknown'}</span></div><p class="detail-provider">${c.provider} · CCS2 rapid charging</p><div class="detail-grid"><div><small>Tariff</small><strong>${c.tariff}</strong></div><div><small>Arrival SOC</small><strong>${c.arrival.toFixed(0)}%</strong></div><div><small>Extra detour</small><strong>${c.additionalDetourKm.toFixed(1)} km</strong></div><div><small>Max power</small><strong>${c.power} kW</strong></div><div><small>Along route</small><strong>${c.miles} mi</strong></div><div><small>Connector</small><strong>CCS2</strong></div></div><p class="freshness">Fixture tariff updated 23 Sep 2026 · ${c.status==='UNKNOWN'?'Live status unavailable; reference data retained.':'Status snapshot is illustrative.'}</p>`;
+    }
+
+    function selectCharger(id) {
+      selectedId = id;
+      renderResults(); renderMarkers(); renderDetail();
+      document.querySelector(`[data-id="${id}"]`)?.scrollIntoView({block:'nearest', behavior:'smooth'});
+    }
+
+    function toast(message) {
+      const el = $('toast'); el.textContent = message; el.classList.add('show');
+      clearTimeout(toast.timer); toast.timer = setTimeout(() => el.classList.remove('show'), 2600);
+    }
+
+    $('providers').innerHTML = providers.map(p => `<label class="provider-toggle"><input type="checkbox" value="${p}"> Exclude ${p}</label>`).join('');
+    ['soc','reserve','battery','efficiency'].forEach(id => $(id).addEventListener('input', updateEnergyPreview));
+    $('find').addEventListener('click', () => findChargers(true));
+    $('sort').addEventListener('change', () => findChargers(false));
+    $('swap').addEventListener('click', () => { const start=$('start').value; $('start').value=$('end').value; $('end').value=start; findChargers(false); toast('Start and destination swapped. Fixture geometry is unchanged in this prototype.'); });
+
+    function registerWebMcp() {
+      const context = document.modelContext;
+      if (!context?.registerTool) return;
+      const lifecycle = new AbortController();
+      Promise.resolve(context.registerTool({
+        name:'configure_route_search', title:'Configure route search',
+        description:'Update ChargeRoute prototype route and EV settings, then recalculate visible charger results.',
+        inputSchema:{type:'object',properties:{start:{type:'string'},destination:{type:'string'},currentSocPct:{type:'number',minimum:1,maximum:100},reserveSocPct:{type:'number',minimum:5,maximum:30},minimumPowerKw:{type:'number',enum:[50,100,150,300]},maxAdditionalDetourKm:{type:'number',enum:[0.5,1,2,5]}},additionalProperties:false},
+        annotations:{readOnlyHint:false,untrustedContentHint:false},
+        execute(input){
+          if(input.start) $('start').value=input.start;
+          if(input.destination) $('end').value=input.destination;
+          if(input.currentSocPct!=null) $('soc').value=input.currentSocPct;
+          if(input.reserveSocPct!=null) $('reserve').value=input.reserveSocPct;
+          if(input.minimumPowerKw!=null){ const el=document.querySelector(`input[name="power"][value="${input.minimumPowerKw}"]`); if(!el) throw new Error('Unsupported minimum power'); el.checked=true; }
+          if(input.maxAdditionalDetourKm!=null) $('additionalDetour').value=input.maxAdditionalDetourKm;
+          findChargers(false);
+          return {resultCount:visible.length, selectedCharger:visible[0]?.name ?? null, model:'frozen_fixture'};
+        }
+      }, {signal:lifecycle.signal})).catch(()=>{});
+    }
+
+    findChargers(false); registerWebMcp();
+  </script>
+</body>
+</html>
