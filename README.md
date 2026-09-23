@@ -55,7 +55,9 @@ The selected API file is read locally by the browser. It is not uploaded, retain
 - Set maximum additional detour to `0.5 km`. Only sites within that extra travel distance should remain.
 - Open **Exclude networks**, select one or more networks, run the search, and confirm their sites disappear.
 - Enter valid MapTiler and ORS keys and confirm the schematic changes to a real map with the calculated route.
-- Pan and zoom the live map, hover a charger marker for its summary, and click a marker to select the corresponding result.
+- Confirm the live map contains only the ORS road route; the old straight schematic line and schematic markers must disappear.
+- Pan and zoom the live map using the canvas or the unobstructed controls at the top right, and hover a charger marker for its summary.
+- Select a charger marker or result to show its detail card. Select the same charger again to hide the card, select it again to restore it, or use the card's close button.
 - Select **Avoid toll roads**, run the route again, and confirm the success message identifies a toll-free route.
 - Turn on **Hide chargers with unknown price** and confirm the price-unavailable result disappears.
 - Select a result card and a map marker. Both views should show the same selected charger.

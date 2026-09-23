@@ -151,6 +151,15 @@
     .live-map { position: absolute; inset: 0; z-index: 1; background: #071c2b; }
     .live-map[hidden] { display: none; }
     .map-stage.live .map-grid { display: none; }
+    .map-stage.live .map-canvas { display: none !important; pointer-events: none !important; visibility: hidden; }
+    .map-stage.live .live-map { inset: 88px 0 0; }
+    .map-stage.live .map-topbar {
+      top: 0; left: 0; right: 0; min-height: 88px; padding: 11px 16px;
+      align-items: center; background: #071c2b; border-bottom: 1px solid rgba(255,255,255,.14);
+    }
+    .map-stage.live .route-card { padding: 8px 11px; box-shadow: none; background: rgba(16,43,59,.96); }
+    .map-stage.live .detail-card, .map-stage.live .disclaimer { display: none !important; }
+    .map-stage.live.detail-open .detail-card { display: block !important; pointer-events: auto; }
     .map-grid { position: absolute; inset: 0; opacity: .32; background-image: linear-gradient(rgba(121,216,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(121,216,255,.08) 1px, transparent 1px); background-size: 42px 42px; mask-image: radial-gradient(circle at 55% 45%, #000 0, transparent 76%); }
     .map-topbar { position: absolute; z-index: 5; top: 18px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; pointer-events: none; }
     .route-card { padding: 12px 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 13px; background: rgba(8,31,46,.82); box-shadow: var(--shadow); backdrop-filter: blur(12px); }
@@ -176,6 +185,9 @@
     .map-label { fill: #dce7eb; font-size: 12px; font-weight: 750; paint-order: stroke; stroke: #071c2b; stroke-width: 4px; stroke-linejoin: round; }
     .detail-card { position: absolute; z-index: 6; right: 20px; bottom: 22px; width: min(360px, calc(100% - 40px)); padding: 17px; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; background: rgba(248,251,250,.97); color: var(--ink); box-shadow: 0 22px 70px rgba(0,0,0,.34); pointer-events: none; }
     .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+    .detail-close { display: none; position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; padding: 0; place-items: center; border: 1px solid #cbd6da; border-radius: 8px; background: white; color: var(--ink); font-size: 1.1rem; line-height: 1; cursor: pointer; }
+    .map-stage.live.detail-open .detail-close { display: grid; }
+    .map-stage.live.detail-open .detail-head { padding-right: 28px; }
     .detail-head h2 { margin: 0; font-size: 1.1rem; letter-spacing: -.02em; }
     .status { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800; }
     .status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #6e9b00; }
@@ -212,6 +224,10 @@
       .result-card { grid-template-columns: auto 1fr; }
       .price { grid-column: 2; text-align: left; }
       .map-stage { min-height: 640px; }
+      .map-stage.live .live-map { inset-block-start: 82px; }
+      .map-stage.live .map-topbar { min-height: 82px; padding: 9px 10px; gap: 7px; }
+      .map-stage.live .route-card { padding: 7px 9px; }
+      .map-stage.live .route-card strong { font-size: .86rem; }
       .map-topbar { top: 12px; left: 12px; right: 12px; }
       .route-card:last-child { display: none; }
       .map-canvas { inset-block-start: 78px; height: calc(100% - 78px); }
@@ -448,12 +464,17 @@
       const c = visible.find(x => x.id === selectedId);
       if (!c) { $('detail').hidden = true; return; }
       $('detail').hidden = false;
-      $('detail').innerHTML = `<div class="detail-head"><h2>${c.name}</h2><span class="status ${c.status==='UNKNOWN'?'unknown':''}">${c.status==='AVAILABLE'?'Available':'Status unknown'}</span></div><p class="detail-provider">${c.provider} · CCS2 rapid charging</p><div class="detail-grid"><div><small>Tariff</small><strong>${c.tariff}</strong></div><div><small>Arrival SOC</small><strong>${c.arrival.toFixed(0)}%</strong></div><div><small>Extra detour</small><strong>${c.additionalDetourKm.toFixed(1)} km</strong></div><div><small>Max power</small><strong>${c.power} kW</strong></div><div><small>Along route</small><strong>${c.miles} mi</strong></div><div><small>Connector</small><strong>CCS2</strong></div></div><p class="freshness">Fixture tariff updated 23 Sep 2026 · ${c.status==='UNKNOWN'?'Live status unavailable; reference data retained.':'Status snapshot is illustrative.'}</p>`;
+      $('detail').innerHTML = `<button class="detail-close" type="button" aria-label="Close charger details">×</button><div class="detail-head"><h2>${c.name}</h2><span class="status ${c.status==='UNKNOWN'?'unknown':''}">${c.status==='AVAILABLE'?'Available':'Status unknown'}</span></div><p class="detail-provider">${c.provider} · CCS2 rapid charging</p><div class="detail-grid"><div><small>Tariff</small><strong>${c.tariff}</strong></div><div><small>Arrival SOC</small><strong>${c.arrival.toFixed(0)}%</strong></div><div><small>Extra detour</small><strong>${c.additionalDetourKm.toFixed(1)} km</strong></div><div><small>Max power</small><strong>${c.power} kW</strong></div><div><small>Along route</small><strong>${c.miles} mi</strong></div><div><small>Connector</small><strong>CCS2</strong></div></div><p class="freshness">Fixture tariff updated 23 Sep 2026 · ${c.status==='UNKNOWN'?'Live status unavailable; reference data retained.':'Status snapshot is illustrative.'}</p>`;
+      $('detail').querySelector('.detail-close').addEventListener('click', () => setLiveDetailOpen(false));
     }
 
     function selectCharger(id) {
+      const stage = document.querySelector('.map-stage');
+      const isLive = Boolean(liveMap && stage.classList.contains('live'));
+      const shouldHideDetails = isLive && selectedId === id && stage.classList.contains('detail-open');
       selectedId = id;
       renderResults(); renderMarkers(); renderDetail();
+      if (isLive) setLiveDetailOpen(!shouldHideDetails);
       document.querySelector(`[data-id="${id}"]`)?.scrollIntoView({block:'nearest', behavior:'smooth'});
       const charger = visible.find(item => item.id === id);
       if (charger && liveMap) liveMap.easeTo({center:charger.coordinates, duration:500});
@@ -486,14 +507,37 @@
       liveMap.getSource('chargers')?.setData(chargerGeoJson());
     }
 
+    function setLiveDetailOpen(open) {
+      const stage = document.querySelector('.map-stage');
+      stage.classList.toggle('detail-open', open);
+      $('detail').setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+
+    function setLiveMapMode(enabled) {
+      const stage = document.querySelector('.map-stage');
+      const schematic = document.querySelector('.map-canvas');
+      const detail = $('detail');
+      const disclaimer = document.querySelector('.disclaimer');
+      stage.classList.toggle('live', enabled);
+      setLiveDetailOpen(false);
+      $('liveMap').hidden = !enabled;
+      schematic.hidden = enabled;
+      schematic.style.pointerEvents = enabled ? 'none' : '';
+      schematic.setAttribute('aria-hidden', enabled ? 'true' : 'false');
+      detail.setAttribute('aria-hidden', enabled ? 'true' : 'false');
+      disclaimer.setAttribute('aria-hidden', enabled ? 'true' : 'false');
+    }
+
     async function ensureLiveMap(maptilerKey) {
       if (!window.maplibregl) throw new Error('The map library could not be loaded. Check your internet connection and try again.');
-      if (liveMap && liveMapKey === maptilerKey) return liveMap;
+      if (liveMap && liveMapKey === maptilerKey) {
+        setLiveMapMode(true);
+        liveMap.resize();
+        return liveMap;
+      }
       if (liveMap) liveMap.remove();
       liveMapKey = maptilerKey;
-      $('liveMap').hidden = false;
-      document.querySelector('.map-stage').classList.add('live');
-      document.querySelector('.map-canvas').hidden = true;
+      setLiveMapMode(true);
       liveMap = new maplibregl.Map({
         container:'liveMap',
         style:`https://api.maptiler.com/maps/streets-v4/style.json?key=${encodeURIComponent(maptilerKey)}`,
@@ -501,7 +545,10 @@
         zoom:6.25,
         attributionControl:true
       });
-      liveMap.addControl(new maplibregl.NavigationControl({showCompass:false}), 'bottom-left');
+      liveMap.addControl(new maplibregl.NavigationControl({showCompass:false}), 'top-right');
+      liveMap.scrollZoom.enable();
+      liveMap.dragPan.enable();
+      liveMap.doubleClickZoom.enable();
       try {
         await new Promise((resolve, reject) => {
           const timer = setTimeout(() => reject(new Error('The MapTiler map did not load. Check the API key and connection.')), 15000);
@@ -514,9 +561,7 @@
         liveMap?.remove();
         liveMap = null;
         liveMapKey = '';
-        $('liveMap').hidden = true;
-        document.querySelector('.map-stage').classList.remove('live');
-        document.querySelector('.map-canvas').hidden = false;
+        setLiveMapMode(false);
         throw error;
       }
       liveMap.addSource('route', {type:'geojson', data:{type:'FeatureCollection',features:[]}});
@@ -548,6 +593,7 @@
         chargerPopup?.remove();
         chargerPopup = null;
       });
+      liveMap.resize();
       return liveMap;
     }
 

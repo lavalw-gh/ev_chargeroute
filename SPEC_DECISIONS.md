@@ -88,7 +88,7 @@ Treat GPX import as a later-version enhancement after live routing, maps, and ro
 
 ## Map interaction and range wording
 
-Information cards over the live map must not capture pointer input. Users must be able to pan and zoom anywhere beneath those cards and use MapLibre's navigation controls. Hovering a sample charger marker shows its name, network, and tariff; clicking it synchronizes the marker with the selected result card.
+When the live map activates, the schematic SVG must be hidden and made non-interactive so its straight route, endpoints, and fixture marker elements cannot appear above or intercept MapLibre. Route and journey metrics occupy a dedicated strip above the map rather than overlaying the canvas. The large selected-charger card and planning disclaimer are hidden when live-map mode first opens. Selecting a charger marker or result opens the detail card; selecting the same charger again hides it, and selecting another charger switches and opens the card. A close control also dismisses it. MapLibre's navigation controls remain unobstructed at the top right. Hovering a sample charger marker shows its name, network, and tariff; clicking it synchronizes the marker with the selected result card.
 
 Label the fixture calculation as, for example, **4 of 8 sample sites qualify · 126 mi estimated usable range**. Here, `4 of 8` means four fixture chargers pass the current power, detour, network, availability, price, and arrival-reserve filters. The range is calculated from battery capacity, current SOC, reserve SOC, and configured efficiency; it is not the route distance.
 
