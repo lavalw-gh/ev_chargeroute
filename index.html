@@ -109,6 +109,13 @@
     .check-row input { width: auto; margin: 0; accent-color: var(--lime-dark); }
     .api-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
     .api-grid input { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: .82rem; }
+    .api-file-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+    .api-file-button { position: relative; display: inline-flex; align-items: center; justify-content: center; min-height: 40px; padding: 9px 12px; border: 1px solid #aebdc3; border-radius: 9px; background: #f6f9f8; color: #294552; font-size: .8rem; font-weight: 800; cursor: pointer; }
+    .api-file-button:hover { border-color: #758c97; background: #eef4f1; }
+    .api-file-button input { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+    .api-file-status { color: var(--muted); font-size: .74rem; }
+    .api-file-status.error { color: #a12a27; }
+    .api-file-status.success { color: #426100; }
     .privacy-note { margin: 8px 0 0; color: var(--muted); font-size: .72rem; }
     .route-notice { min-height: 1.25rem; margin: 8px 0 0; color: #5c6f79; font-size: .75rem; }
     .route-notice.error { color: #a12a27; }
@@ -145,7 +152,7 @@
     .live-map[hidden] { display: none; }
     .map-stage.live .map-grid { display: none; }
     .map-grid { position: absolute; inset: 0; opacity: .32; background-image: linear-gradient(rgba(121,216,255,.08) 1px, transparent 1px), linear-gradient(90deg, rgba(121,216,255,.08) 1px, transparent 1px); background-size: 42px 42px; mask-image: radial-gradient(circle at 55% 45%, #000 0, transparent 76%); }
-    .map-topbar { position: absolute; z-index: 5; top: 18px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .map-topbar { position: absolute; z-index: 5; top: 18px; left: 20px; right: 20px; display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; pointer-events: none; }
     .route-card { padding: 12px 14px; border: 1px solid rgba(255,255,255,.16); border-radius: 13px; background: rgba(8,31,46,.82); box-shadow: var(--shadow); backdrop-filter: blur(12px); }
     .route-card small { display: block; color: #a9bdc8; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
     .route-card strong { display: block; margin-top: 2px; font-size: .98rem; }
@@ -167,7 +174,7 @@
     .marker:hover circle, .marker.active circle { r: 11; fill: white; }
     .marker text { fill: var(--ink); font-size: 9px; font-weight: 900; text-anchor: middle; dominant-baseline: middle; pointer-events: none; }
     .map-label { fill: #dce7eb; font-size: 12px; font-weight: 750; paint-order: stroke; stroke: #071c2b; stroke-width: 4px; stroke-linejoin: round; }
-    .detail-card { position: absolute; z-index: 6; right: 20px; bottom: 22px; width: min(360px, calc(100% - 40px)); padding: 17px; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; background: rgba(248,251,250,.97); color: var(--ink); box-shadow: 0 22px 70px rgba(0,0,0,.34); }
+    .detail-card { position: absolute; z-index: 6; right: 20px; bottom: 22px; width: min(360px, calc(100% - 40px)); padding: 17px; border: 1px solid rgba(255,255,255,.18); border-radius: 16px; background: rgba(248,251,250,.97); color: var(--ink); box-shadow: 0 22px 70px rgba(0,0,0,.34); pointer-events: none; }
     .detail-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
     .detail-head h2 { margin: 0; font-size: 1.1rem; letter-spacing: -.02em; }
     .status { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 800; }
@@ -179,7 +186,7 @@
     .detail-grid small { display: block; color: var(--muted); font-size: .66rem; text-transform: uppercase; letter-spacing: .05em; }
     .detail-grid strong { display: block; margin-top: 2px; font-size: .88rem; }
     .freshness { margin: 12px 0 0; color: var(--muted); font-size: .72rem; }
-    .disclaimer { position: absolute; z-index: 4; left: 20px; bottom: 22px; max-width: 300px; color: #9eb1bb; font-size: .7rem; }
+    .disclaimer { position: absolute; z-index: 4; left: 20px; bottom: 22px; max-width: 300px; color: #9eb1bb; font-size: .7rem; pointer-events: none; }
     .toast { position: fixed; z-index: 20; left: 50%; bottom: 24px; translate: -50% 16px; padding: 11px 14px; border-radius: 10px; background: #fff; color: var(--ink); box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: .22s ease; font-size: .83rem; }
     .toast.show { opacity: 1; translate: -50% 0; }
     @media (max-width: 900px) {
@@ -252,10 +259,10 @@
             </div>
             <label class="field" style="margin-top:12px">Maximum additional detour to charger
               <select id="additionalDetour">
-                <option value="0.5">0.5 km</option>
                 <option value="1" selected>1.0 km</option>
                 <option value="2">2.0 km</option>
                 <option value="5">5.0 km</option>
+                <option value="10">10.0 km</option>
               </select>
             </label>
             <div class="section-label"><span>Networks</span><span>Exclude any</span></div>
@@ -273,6 +280,10 @@
             <label class="check-row"><input id="avoidTolls" type="checkbox"> Avoid toll roads</label>
 
             <div class="section-label"><span>Live map &amp; routing</span><span>Session only</span></div>
+            <div class="api-file-row">
+              <label class="api-file-button">Load API file<input id="apiFile" type="file" accept=".txt,text/plain"></label>
+              <span class="api-file-status" id="apiFileStatus" role="status">Strict two-line text file</span>
+            </div>
             <div class="api-grid">
               <label class="field">MapTiler API<input id="maptilerApi" type="password" autocomplete="off" spellcheck="false" placeholder="Enter MapTiler key"></label>
               <label class="field">ORS API<input id="orsApi" type="password" autocomplete="off" spellcheck="false" placeholder="Enter ORS key"></label>
@@ -337,6 +348,7 @@
     let liveMap = null;
     let liveMapKey = '';
     let liveRoute = null;
+    let chargerPopup = null;
     const $ = id => document.getElementById(id);
 
     function values() {
@@ -410,7 +422,7 @@
       const results = $('results');
       const v = values();
       $('resultsHeading').textContent = visible.length ? 'Reachable chargers' : 'No matching chargers';
-      $('summary').textContent = visible.length ? `${visible.length} of ${chargers.length} sites qualify · ${Math.round(v.battery * (v.soc-v.reserve)/100 * v.efficiency)} mi modelled reach` : '';
+      $('summary').textContent = visible.length ? `${visible.length} of ${chargers.length} sample sites qualify · ${Math.round(v.battery * (v.soc-v.reserve)/100 * v.efficiency)} mi estimated usable range` : '';
       if (!visible.length) {
         results.innerHTML = `<div class="empty">${message || 'No chargers match your reserve and filters. Try lowering minimum power, allowing a longer additional detour, or reducing reserve.'}</div>`;
         renderMarkers(); renderDetail(); return;
@@ -521,8 +533,21 @@
       });
       liveMap.addLayer({id:'charger-labels',type:'symbol',source:'chargers',layout:{'text-field':['get','rank'],'text-size':11,'text-font':['Open Sans Bold']},paint:{'text-color':'#071c2b'}});
       liveMap.on('click', 'charger-points', event => selectCharger(event.features?.[0]?.properties?.id));
-      liveMap.on('mouseenter', 'charger-points', () => { liveMap.getCanvas().style.cursor = 'pointer'; });
-      liveMap.on('mouseleave', 'charger-points', () => { liveMap.getCanvas().style.cursor = ''; });
+      liveMap.on('mouseenter', 'charger-points', event => {
+        liveMap.getCanvas().style.cursor = 'pointer';
+        const charger = chargers.find(item => item.id === event.features?.[0]?.properties?.id);
+        if (!charger) return;
+        chargerPopup?.remove();
+        chargerPopup = new maplibregl.Popup({closeButton:false, closeOnClick:false, offset:14})
+          .setLngLat(charger.coordinates)
+          .setText(`${charger.name} · ${charger.provider} · ${charger.tariff}`)
+          .addTo(liveMap);
+      });
+      liveMap.on('mouseleave', 'charger-points', () => {
+        liveMap.getCanvas().style.cursor = '';
+        chargerPopup?.remove();
+        chargerPopup = null;
+      });
       return liveMap;
     }
 
@@ -603,6 +628,40 @@
       }
     }
 
+    function parseApiFile(contents) {
+      if (contents.length > 4096) throw new Error('API file error. The file is unexpectedly large.');
+      const normalized = contents.replace(/\r\n?/g, '\n').replace(/\n$/, '');
+      const lines = normalized.split('\n');
+      if (lines.length !== 2) throw new Error('API file error. Expected exactly two lines: Maptile and ORS.');
+      const maptiler = lines[0].match(/^Maptile: (\S+)$/)?.[1];
+      const ors = lines[1].match(/^ORS: (\S+)$/)?.[1];
+      if (!maptiler || !ors) throw new Error('API file error. Use “Maptile: key” followed by “ORS: key”.');
+      return {maptiler, ors};
+    }
+
+    async function loadApiFile(event) {
+      const input = event.currentTarget;
+      const status = $('apiFileStatus');
+      const file = input.files?.[0];
+      if (!file) return;
+      try {
+        const keys = parseApiFile(await file.text());
+        $('maptilerApi').value = keys.maptiler;
+        $('orsApi').value = keys.ors;
+        status.textContent = `${file.name} loaded`;
+        status.className = 'api-file-status success';
+        setRouteNotice('API file loaded. Select Find reachable chargers to load the live route.');
+      } catch (error) {
+        $('maptilerApi').value = '';
+        $('orsApi').value = '';
+        status.textContent = 'API file error';
+        status.className = 'api-file-status error';
+        setRouteNotice(error.message || 'API file error.', 'error');
+      } finally {
+        input.value = '';
+      }
+    }
+
     $('providers').innerHTML = providers.map(p => `<label class="provider-toggle"><input type="checkbox" value="${p}"> ${p}</label>`).join('');
     function updateProviderSummary() {
       const selected = [...document.querySelectorAll('#providers input:checked')].map(el => el.value);
@@ -613,6 +672,7 @@
     $('clearProviders').addEventListener('click', () => { document.querySelectorAll('#providers input').forEach(el => el.checked = false); updateProviderSummary(); });
     document.addEventListener('click', event => { if (!$('networkPicker').contains(event.target)) $('networkPicker').open = false; });
     $('networkPicker').addEventListener('keydown', event => { if (event.key === 'Escape') { $('networkPicker').open = false; $('networkPicker').querySelector('summary').focus(); } });
+    $('apiFile').addEventListener('change', loadApiFile);
     ['soc','reserve','battery','efficiency'].forEach(id => $(id).addEventListener('input', updateEnergyPreview));
     $('find').addEventListener('click', runSearch);
     $('sort').addEventListener('change', () => findChargers(false));
@@ -625,7 +685,7 @@
       Promise.resolve(context.registerTool({
         name:'configure_route_search', title:'Configure route search',
         description:'Update ChargeRoute prototype route and EV settings, then recalculate visible charger results.',
-        inputSchema:{type:'object',properties:{start:{type:'string'},destination:{type:'string'},currentSocPct:{type:'number',minimum:1,maximum:100},reserveSocPct:{type:'number',minimum:5,maximum:30},minimumPowerKw:{type:'number',enum:[50,100,150,300]},maxAdditionalDetourKm:{type:'number',enum:[0.5,1,2,5]}},additionalProperties:false},
+        inputSchema:{type:'object',properties:{start:{type:'string'},destination:{type:'string'},currentSocPct:{type:'number',minimum:1,maximum:100},reserveSocPct:{type:'number',minimum:5,maximum:30},minimumPowerKw:{type:'number',enum:[50,100,150,300]},maxAdditionalDetourKm:{type:'number',enum:[1,2,5,10]}},additionalProperties:false},
         annotations:{readOnlyHint:false,untrustedContentHint:false},
         execute(input){
           if(input.start) $('start').value=input.start;

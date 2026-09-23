@@ -33,11 +33,20 @@ GitHub Pages publishes static sites publicly. Do not add API keys or other secre
 ## API setup
 
 1. Obtain a MapTiler API key and an openrouteservice/HeiGIT API key.
-2. Open the running prototype.
-3. Enter both keys in **Live map & routing**. The inputs are masked and are not saved.
-4. Optionally select **Avoid toll roads**, then choose **Find reachable chargers**.
+2. Create a plain-text file containing exactly two lines, with no blank lines:
+
+```text
+Maptile: YOUR_MAPTILER_KEY
+ORS: YOUR_ORS_KEY
+```
+
+3. Open the running prototype and choose **Load API file**. A malformed file displays **API file error** and clears both key fields.
+4. Alternatively, enter the two keys manually. The inputs are masked and are not saved.
+5. Optionally select **Avoid toll roads**, then choose **Find reachable chargers**.
 
 For this static prototype, API calls run from the browser. Restrict the MapTiler key to the deployed domain where possible. A production implementation must send ORS requests through a backend so the ORS credential is never exposed to browser users.
+
+The selected API file is read locally by the browser. It is not uploaded, retained, or added to the GitHub project. Never commit the API text file to the repository.
 
 ## Suggested checks
 
@@ -46,6 +55,7 @@ For this static prototype, API calls run from the browser. Restrict the MapTiler
 - Set maximum additional detour to `0.5 km`. Only sites within that extra travel distance should remain.
 - Open **Exclude networks**, select one or more networks, run the search, and confirm their sites disappear.
 - Enter valid MapTiler and ORS keys and confirm the schematic changes to a real map with the calculated route.
+- Pan and zoom the live map, hover a charger marker for its summary, and click a marker to select the corresponding result.
 - Select **Avoid toll roads**, run the route again, and confirm the success message identifies a toll-free route.
 - Turn on **Hide chargers with unknown price** and confirm the price-unavailable result disappears.
 - Select a result card and a map marker. Both views should show the same selected charger.
@@ -55,6 +65,7 @@ For this static prototype, API calls run from the browser. Restrict the MapTiler
 
 - A live route requires valid MapTiler and ORS keys plus internet access.
 - The route geometry can be live, but charger positions and route-relative charger distances are still fixtures.
+- The result summary identifies how many of the eight sample sites pass the current filters and displays the battery-modelled usable range.
 - Prices and availability are illustrative, not current public-charger information.
 - The energy model is constant-efficiency and does not include weather, elevation, traffic, speed, battery temperature, or charging curves.
 - The prototype is static and has no backend, database, ingestion worker, or administrative endpoints.

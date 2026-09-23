@@ -78,9 +78,18 @@ Treat GPX import as a later-version enhancement after live routing, maps, and ro
 ## Initial live-routing prototype scope
 
 - Accept masked MapTiler and ORS API-key inputs immediately above the search action.
+- Allow a local API text file with exactly `Maptile: <key>` on line one and `ORS: <key>` on line two. Reject every other layout with **API file error**, clear any existing key values, and never upload or persist the file.
 - Keep both keys in page memory only; do not use local storage, cookies, query strings, or checked-in configuration.
 - Use the MapTiler `streets-v4` style with the bundled MapLibre GL JS renderer.
 - Geocode UK start and destination text and request a `driving-car` route from the HeiGIT-hosted ORS API.
 - When **Avoid toll roads** is selected, send `options.avoid_features: ["tollways"]` and recalculate the route.
 - Keep charger, tariff, availability, chainage, and detour information as clearly labelled fixture data until live OCPI ingestion and spatial matching are implemented.
 - In production, proxy ORS through the backend and apply provider throttling; do not ship a privileged ORS key to browsers.
+
+## Map interaction and range wording
+
+Information cards over the live map must not capture pointer input. Users must be able to pan and zoom anywhere beneath those cards and use MapLibre's navigation controls. Hovering a sample charger marker shows its name, network, and tariff; clicking it synchronizes the marker with the selected result card.
+
+Label the fixture calculation as, for example, **4 of 8 sample sites qualify · 126 mi estimated usable range**. Here, `4 of 8` means four fixture chargers pass the current power, detour, network, availability, price, and arrival-reserve filters. The range is calculated from battery capacity, current SOC, reserve SOC, and configured efficiency; it is not the route distance.
+
+The maximum additional-detour options for this version are 1 km, 2 km, 5 km, and 10 km.
