@@ -37,7 +37,7 @@ GitHub Pages publishes static sites publicly. Do not add API keys or other secre
 - Change current SOC from 60% to 20%. No charger should remain reachable with the default reserve.
 - Restore SOC to 60%, select `150+ kW`, and run the search. Lower-powered sites should disappear.
 - Set maximum additional detour to `0.5 km`. Only sites within that extra travel distance should remain.
-- Exclude a network and confirm its sites disappear.
+- Open **Exclude networks**, select one or more networks, run the search, and confirm their sites disappear.
 - Turn on **Hide chargers with unknown price** and confirm the price-unavailable result disappears.
 - Select a result card and a map marker. Both views should show the same selected charger.
 - Resize the browser to a phone-width window and confirm there is no horizontal page scrolling.
@@ -50,3 +50,11 @@ GitHub Pages publishes static sites publicly. Do not add API keys or other secre
 - The energy model is constant-efficiency and does not include weather, elevation, traffic, speed, battery temperature, or charging curves.
 - The prototype is static and has no backend, database, ingestion worker, or administrative endpoints.
 
+## Planned implementation path
+
+1. Build the production application foundation, database schema, provider adapters, configuration, and automated tests.
+2. Import live OCPI location, connector, tariff, and status data.
+3. Add live geocoding and routing plus a real interactive MapLibre map. Include **Avoid tolls** as a route option at this stage.
+4. Implement route-corridor search, chainage, reachability, exclusions, and final road-distance detour checks.
+5. Add optional GPX preferred-route import after the live routing and spatial-search path is stable. The first version should validate and follow the imported track; road snapping may require a separate map-matching service or self-hosted routing engine.
+6. Complete the energy model, price ranking, caching, monitoring, accessibility, security, and private-trial deployment.

@@ -63,3 +63,14 @@ Immediately before connecting live services, confirm from each provider's curren
 
 Keep these values configurable. An upstream failure should retain the last successful charger snapshot and show its freshness rather than producing misleading live results.
 
+## Network exclusion control
+
+Present network exclusions as a compact dropdown containing a checkbox list. The control must support multiple selections, show a concise selection summary when closed, and provide **Select all** and **Clear** actions. Newly discovered networks can be added to the list without expanding the main filter layout.
+
+## Map and additional routing features
+
+The production version should replace the schematic fixture with a real interactive map. Render the selected route as GeoJSON, display charger markers from live data, keep marker and result-card selection synchronized, fit the viewport to the route, and show the required map-data attribution. Map tiles and routing are separate provider concerns and must be configurable.
+
+Add **Avoid tolls** with the first live routing integration. It is a route-generation preference, so changing it must request a new route and rerun charger reachability rather than filtering the existing results.
+
+Treat GPX import as the next routing enhancement after live routing, maps, and route-corridor search. The initial mode should accept a valid driving track as preferred/locked route geometry, validate and simplify it, and calculate charger reachability along it. A later mode may convert the track to via points or use map matching. Uploaded route files should not be persisted by default.
